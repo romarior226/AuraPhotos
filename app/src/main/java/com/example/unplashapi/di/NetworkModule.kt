@@ -2,6 +2,7 @@ package com.example.unplashapi.di
 
 import android.util.Log
 import com.example.unplashapi.BuildConfig
+import com.example.unplashapi.data.network.remote.Unsplash
 import com.example.unplashapi.data.network.remote.UnsplashApi
 import dagger.Module
 import dagger.Provides
@@ -14,6 +15,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Singleton
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -52,5 +54,27 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
             .create(UnsplashApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @AuthClient
+    fun provideAuthOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUnsplash(@AuthClient client: OkHttpClient, json: Json): Unsplash {
+        return Retrofit.Builder()
+            .baseUrl("https://unsplash.com/oauth/")
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(Unsplash::class.java)
     }
 }

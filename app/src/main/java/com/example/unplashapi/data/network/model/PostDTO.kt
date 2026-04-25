@@ -5,15 +5,15 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class PhotoDTO(
+data class PostDTO(
     @SerialName("id") val id: String,
-    @SerialName("urls") val urls: PhotoUrl,
+    @SerialName("urls") val urls: PhotoUrlDTO,
     @SerialName("user") val user: UserDTO,
 
-)
+    )
 
 
 @Serializable
-data class PhotoUrl(
+data class PhotoUrlDTO(
     @SerialName("full") val fullUrl: String
 )

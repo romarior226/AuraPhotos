@@ -2,7 +2,6 @@ package com.example.unplashapi.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -34,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -46,7 +44,7 @@ import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.DetailPhoto
 
 @Composable
-fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit) {
+fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit ,  onAvatarClickListener : (String)-> Unit) {
     val clipboardManager = LocalClipboardManager.current
     Scaffold(
         topBar = {
@@ -69,17 +67,26 @@ fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit) {
                         contentDescription = null,
                         placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceVariant),
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(50.dp)
                             .clip(RoundedCornerShape(50))
+                            .clickable(
+                                onClick = {
+                                    onAvatarClickListener(detailPhoto.authorUserName)
+                                }
+                            )
 
                     )
                     Text(
                         text = detailPhoto.authorName,
                         modifier = Modifier.weight(1f),
-                        fontSize = 13.sp
+                        fontSize = 15.sp
                     )
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Icon(Icons.Default.BookmarkBorder, contentDescription = null)
+                    Icon(Icons.Default.Add, contentDescription = null, Modifier.size(30.dp))
+                    Icon(
+                        Icons.Default.BookmarkBorder,
+                        contentDescription = null,
+                        Modifier.size(30.dp)
+                    )
                 }
 
             }
@@ -89,8 +96,7 @@ fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit) {
             Modifier
                 .padding(it)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-            ,
+                .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         )
         {
@@ -275,6 +281,7 @@ fun DetailedScreenPreview() {
             ),
             link = "",
         ),
-        onBackPressed = {}
+        onBackPressed = {},
+        {}
     )
 }

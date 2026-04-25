@@ -2,12 +2,18 @@ package com.example.unplashapi.data.mapper
 
 import com.example.unplashapi.data.models.PhotoDbModel
 import com.example.unplashapi.data.network.model.DetailPhotoDTO
-import com.example.unplashapi.data.network.model.PhotoDTO
+import com.example.unplashapi.data.network.model.PostDTO
+import com.example.unplashapi.data.network.model.SimplePhotoDTO
+import com.example.unplashapi.data.network.model.TokenDTO
+import com.example.unplashapi.data.network.model.UserDetailDTO
 import com.example.unplashapi.domain.models.DetailPhoto
 import com.example.unplashapi.domain.models.Post
+import com.example.unplashapi.domain.models.SimplePhoto
+import com.example.unplashapi.domain.models.Token
+import com.example.unplashapi.domain.models.UserDetail
 
 
-fun PhotoDTO.toModel(): Post {
+fun PostDTO.toModel(): Post {
     return Post(
         id = this.id,
         authorName = this.user.name,
@@ -56,5 +62,33 @@ fun DetailPhotoDTO.toModel(): DetailPhoto {
         link = this.links.html,
     )
 }
+
+fun SimplePhotoDTO.toModel(): SimplePhoto {
+    return SimplePhoto(
+        id = this.id,
+        urls = this.urls.fullUrl
+    )
+}
+
+fun TokenDTO.toModel(): Token {
+    return Token(
+        accessToken = this.accessToken,
+        username = this.username
+    )
+}
+
+fun UserDetailDTO.toModel(): UserDetail {
+    return UserDetail(
+        id = this.id,
+        username = this.username,
+        profileImage = this.profileImage.large,
+        name = this.name,
+        bio = this.bio,
+        totalCollections = this.totalCollections,
+        location = this.location,
+        totalPhotos = this.totalPhotos
+    )
+}
+
 
 

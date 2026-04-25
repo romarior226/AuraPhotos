@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -28,6 +28,9 @@ android {
         // Отримуємо ключ прямо з gradle.properties
         val unsplashKey = project.findProperty("UNSPLASH_KEY")?.toString() ?: ""
         buildConfigField("String", "UNSPLASH_KEY", "\"$unsplashKey\"")
+
+        val unsplashSecretKey = project.findProperty("SECRET_KEY")?.toString() ?: ""
+        buildConfigField("String", "SECRET_KEY", "\"$unsplashSecretKey\"")
     }
 
     buildTypes {
@@ -55,9 +58,18 @@ android {
 }
 
 dependencies {
+
+    // Preferences DataStore (SharedPreferences like APIs)
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation("androidx.datastore:datastore:1.2.1")
+
+    implementation("androidx.credentials:credentials:1.2.2")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
-
+    implementation("androidx.browser:browser:1.8.0")
 // kotlinx.serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")

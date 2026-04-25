@@ -2,6 +2,7 @@ package com.example.unplashapi.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.unplashapi.AppDataStore
 import com.example.unplashapi.data.PhotoDatabase
 import com.example.unplashapi.data.dao.PhotoDao
 import dagger.Module
@@ -29,5 +30,12 @@ object DataBaseModule {
     fun providesPhotoDao(database: PhotoDatabase): PhotoDao {
         return database.photoDao()
 
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideAuthDataStore(@ApplicationContext context: Context): AppDataStore {
+        return AppDataStore(context)
     }
 }

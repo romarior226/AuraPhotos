@@ -9,7 +9,7 @@ data class DetailPhotoDTO(
     @SerialName("id") val id: String,
     @SerialName("created_at") val createdAt: String,
     @SerialName("downloads") val downloads: Int?,
-    @SerialName("urls") val urls: PhotoUrl,
+    @SerialName("urls") val urls: PhotoUrlDTO,
     @SerialName("location") val location: LocationDTO?,
     @SerialName("user") val user: UserDTO,
     @SerialName("tags") val tags: List<TagDTO>,

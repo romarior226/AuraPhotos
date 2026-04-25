@@ -3,10 +3,14 @@ package com.example.unplashapi.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.unplashapi.domain.models.Post
+import com.example.unplashapi.domain.models.SimplePhoto
+import com.example.unplashapi.domain.models.UserDetail
 import com.example.unplashapi.domain.usecases.AddFavouriteUseCase
 import com.example.unplashapi.domain.usecases.DeleteFavouriteUseCase
 import com.example.unplashapi.domain.usecases.GetListFavouritePostUseCase
 import com.example.unplashapi.domain.usecases.GetListPostUseCase
+import com.example.unplashapi.domain.usecases.GetUserUseCase
+import com.example.unplashapi.domain.usecases.GetUsersPhotoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,29 +23,56 @@ class PostViewModel @Inject constructor(
     val getListPostsUseCase: GetListPostUseCase,
     val getListFavouritePostUseCase: GetListFavouritePostUseCase,
     val addFavouriteUseCase: AddFavouriteUseCase,
-    val deleteFavouriteUseCase: DeleteFavouriteUseCase
+    val deleteFavouriteUseCase: DeleteFavouriteUseCase,
+    val getUserUseCase: GetUserUseCase,
+    val getUsersPhotoUseCase: GetUsersPhotoUseCase
 ) : ViewModel() {
 
-    val favouritePost = getListFavouritePostUseCase()
+    private val _currentUser = MutableStateFlow<UserDetail?>(null)
+    val currentUser: StateFlow<UserDetail?> = _currentUser
+
+    private val _usersPhotos = MutableStateFlow<List<SimplePhoto>>(emptyList())
+    val usersPhotos: StateFlow<List<SimplePhoto>> = _usersPhotos
 
     private val _post = MutableStateFlow<Post?>(null)
     val post: StateFlow<Post?> = _post
 
-    private val _posts = MutableStateFlow<List<Post>>(emptyList())
 
+    private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
 
     init {
         viewModelScope.launch {
-            _posts.value.map {
-                getListFavouritePostUseCase().collect { favourites ->
-                    val favouriteIds = favourites.map { it.id }.toSet()
-                    _posts.value = _posts.value.map { post ->
-                        post.copy(isFavourite = post.id in favouriteIds)
-                    }
+            getListFavouritePostUseCase().collect { favourites ->
+                val favouriteIds = favourites.map { it.id }.toSet()
+                _posts.value = _posts.value.map { post ->
+                    post.copy(isFavourite = post.id in favouriteIds)
                 }
             }
         }
+    }
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            val user = getUserUseCase(id)
+            _currentUser.value = user
+            loadUsersPhoto(user.username)
+
+        }
+    }
+
+    fun loadNextPage(userName: String, page: Int) {
+        viewModelScope.launch {
+            _usersPhotos.value +=   getUsersPhotoUseCase(userName, page)
+        }
+
+    }
+
+    fun loadUsersPhoto(userName: String) {
+        viewModelScope.launch {
+            _usersPhotos.value = getUsersPhotoUseCase(userName)
+        }
+
     }
 
     fun toggleFavourite(id: String) {
@@ -55,18 +86,6 @@ class PostViewModel @Inject constructor(
             _posts.value = _posts.value.map {
                 if (it.id == id) it.copy(isFavourite = !it.isFavourite) else it
             }
-        }
-    }
-
-    fun addFavourite(post: Post) {
-        viewModelScope.launch {
-            addFavouriteUseCase(post)
-        }
-    }
-
-    fun deleteFavourite(id: String) {
-        viewModelScope.launch {
-            deleteFavouriteUseCase(id)
         }
     }
 

@@ -13,6 +13,10 @@ data class UserDTO(
 )
 
 @Serializable
-data class ProfileImageDTO(
+data class  ProfileImageDTO(
     @SerialName("medium") val medium: String
+)
+@Serializable
+data class  ProfileImageLargeDTO(
+    @SerialName("large") val large: String
 )
