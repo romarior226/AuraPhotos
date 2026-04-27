@@ -22,11 +22,18 @@ class AppDataStore(private val context: Context) {
         }
     }
 
+    suspend fun updateUserName(newUserName: String) {
+        context.dataStore.edit { preferences ->
+            preferences[AuthPreferences.USERNAME] = newUserName
+        }
+    }
+
     suspend fun saveToken(token: String) {
         context.dataStore.edit { prefs ->
             prefs[AuthPreferences.ACCESS_TOKEN] = token
         }
     }
+
 
     suspend fun clearToken() {
         context.dataStore.edit { prefs ->

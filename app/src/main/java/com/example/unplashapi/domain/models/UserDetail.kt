@@ -8,5 +8,9 @@ data class UserDetail(
     val bio: String?,
     val totalCollections: Int,
     val totalPhotos: Int,
-    val location: String? = null
+    val location: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val email: String? = null,
+    val instagramUsername: String? = null
 )

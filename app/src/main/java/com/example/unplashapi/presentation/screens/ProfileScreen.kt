@@ -20,8 +20,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.Save
@@ -29,6 +31,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,8 +39,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +55,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.SimplePhoto
 import com.example.unplashapi.domain.models.UserDetail
+import com.example.unplashapi.presentation.viewmodels.EditProfileUiState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -58,7 +64,10 @@ fun ProfileScreen(
     collection: List<SimplePhoto>,
     onBackPressed: () -> Unit,
     loadMorePhoto: (Int) -> Unit,
-    onPhotoClicked: (String) -> Unit
+    onPhotoClicked: (String) -> Unit,
+    isEditable: Boolean = false,
+    onSaveProfile: (String, String, String, String, String, String, String) -> Unit,
+    editState: EditProfileUiState
 ) {
     Scaffold(Modifier.fillMaxWidth()) {
         Column(
@@ -69,6 +78,7 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val openAlertDialog = remember { mutableStateOf(false) }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,19 +100,39 @@ fun ProfileScreen(
                 ) {
                     Text(profile.name, fontSize = 24.sp)
                     Text("@${profile.username}", fontSize = 14.sp)
+                    Spacer(Modifier.height(5.dp))
+                    if (isEditable) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(30)
+                                )
+                                .padding(vertical = 2.dp, horizontal = 5.dp)
+                                .clickable {
+                                    openAlertDialog.value = true
+                                }
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "")
+                            Text("Edit profile")
+                        }
+
+                    }
 
                 }
             }
-            val openAlertDialog = remember { mutableStateOf(true) }
 
-            // ...
-//            when {
-//                // ...
-//                openAlertDialog.value -> {
-//                    MinimalDialog()
-//                }
-//            }
 
+            when {
+                openAlertDialog.value -> {
+                    MinimalDialog(
+                        onDismissRequest = { openAlertDialog.value = false },
+                        currentUser = editState,
+                        onSaveProfile
+                    )
+                }
+            }
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -120,7 +150,7 @@ fun ProfileScreen(
                         .padding(10.dp), lineHeight = 16.sp
                 )
             }
-            if (profile.location != null){
+            if (profile.location != null) {
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -128,7 +158,7 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Default.LocationOn, contentDescription = null)
-                    Text(profile.location , fontSize = 14.sp)
+                    Text(profile.location, fontSize = 14.sp)
                 }
             }
 
@@ -236,23 +266,37 @@ fun ProfileScreenPreview() {
         collection = listOf(),
         onBackPressed = { },
         loadMorePhoto = {},
-        {}
+        {},
+        isEditable = TODO(),
+        onSaveProfile = TODO(),
+        editState = TODO(),
+    )
+    MinimalDialog(
+        {},
+        onSaveProfile = { string, string1, string2, string3, string4, string5, string6 ->
+        },
+        currentUser = TODO(),
     )
 }
 
-@Preview
 @Composable
-fun MinimalDialog() {
-    Dialog(onDismissRequest = {}) {
+fun MinimalDialog(
+    onDismissRequest: () -> Unit,
+    currentUser: EditProfileUiState,
+    onSaveProfile: (String, String, String, String, String, String, String) -> Unit,
+) {
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        var editProfileUiState by remember { mutableStateOf(EditProfileUiState()) }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp),
+                .height(620.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.background
             )
         ) {
+
             Column() {
                 Row(
                     Modifier
@@ -268,40 +312,119 @@ fun MinimalDialog() {
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp
                     )
-                    Icon(Icons.Default.Close, contentDescription = "")
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "",
+                        modifier = Modifier.clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = {
+                                onDismissRequest()
+                            }
+                        ))
                 }
-
                 Column(
                     Modifier
                         .padding(vertical = 10.dp, horizontal = 15.dp)
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    CustomTextFiled("Change Name") {}
-                    CustomTextFiled("Change Age") {}
-                    CustomTextFiled("Change Email") {}
-                    CustomTextFiled("Change UserName") {}
-                    CustomTextFiled("Location ") {}
+                    CustomTextFiled(
+                        label = "Change username",
+                        value = currentUser.username
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(username = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change firstname",
+                        value = currentUser.firstName
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(firstName = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change lastname",
+                        value = currentUser.lastName
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(lastName = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change Email",
+                        value = currentUser.email
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(email = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change Location",
+                        value = currentUser.location
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(location = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change Bio",
+                        value = currentUser.bio
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(bio = it)
+                    }
+                    CustomTextFiled(
+                        label = "Change Instagram",
+                        value = currentUser.instagramUsername
+                    ) {
+                        editProfileUiState = editProfileUiState.copy(instagramUsername = it)
+                    }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+                    OutlinedButton(
+                        onClick = {
+                            if (editProfileUiState.isDataValid) {
+                                onSaveProfile(
+                                    editProfileUiState.username,
+                                    editProfileUiState.firstName,
+                                    editProfileUiState.lastName,
+                                    editProfileUiState.email,
+                                    editProfileUiState.location,
+                                    editProfileUiState.bio,
+                                    editProfileUiState.instagramUsername
+                                )
+                                onDismissRequest()
+                            }
+
+                        }
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
-
-
         }
     }
 }
 
+/*
+ username = _state.value.username,
+                firstName = _state.value.firstName,
+                lastName = _state.value.lastName,
+                email = _state.value.email,
+                location = _state.value.location,
+                bio = _state.value.bio,
+                instagramUsername = _state.value.instagramUsername,
+ */
+
 @Composable
-fun CustomTextFiled(value: String, onValueChange: (String) -> Unit) {
+fun CustomTextFiled(label: String, value: String, onSaveClickListener: (String) -> Unit) {
+
+    var currentText by remember { mutableStateOf(value) }
+    var currentIcon by remember { mutableStateOf(Icons.Default.Save) }
     Row(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.background , RoundedCornerShape(30))
+            .background(color = MaterialTheme.colorScheme.background, RoundedCornerShape(30))
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
-            value = value,
+            label = { Text(label) },
+            value = currentText,
             onValueChange = {
-                onValueChange(it)
+                currentIcon = Icons.Default.Save
+                currentText = it
             },
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -311,7 +434,15 @@ fun CustomTextFiled(value: String, onValueChange: (String) -> Unit) {
             modifier = Modifier.weight(1f)
         )
         Spacer(Modifier.width(10.dp))
-        Icon(Icons.Default.Save, contentDescription = null, Modifier.size(20.dp))
+        Icon(
+            currentIcon, contentDescription = null, Modifier
+                .size(20.dp)
+                .clickable(
+                    onClick = {
+                        currentIcon = Icons.Default.Check
+                        onSaveClickListener(currentText)
+                    }
+                ))
     }
 
 }

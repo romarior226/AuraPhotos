@@ -14,9 +14,9 @@ class FavouritePostRepositoryImpl @Inject constructor(val photoDao: PhotoDao) :
 
 
     override  fun getFavouritePosts(): Flow<List<Post>> {
-        return photoDao.getAllPhotos().map {
-            it.map {
-                it.toModel()
+        return photoDao.getAllPhotos().map { it ->
+            it.map {photoDbModel ->
+                photoDbModel.toModel()
             }
         }
     }

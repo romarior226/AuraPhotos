@@ -86,7 +86,11 @@ fun UserDetailDTO.toModel(): UserDetail {
         bio = this.bio,
         totalCollections = this.totalCollections,
         location = this.location,
-        totalPhotos = this.totalPhotos
+        totalPhotos = this.totalPhotos,
+        firstName = this.firstName,
+        lastName = this.lastName,
+        email = this.email,
+        instagramUsername = this.instagramUsername,
     )
 }
 

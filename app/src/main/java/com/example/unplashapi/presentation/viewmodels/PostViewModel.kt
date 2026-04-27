@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class PostViewModel @Inject constructor(
     val getListPostsUseCase: GetListPostUseCase,
@@ -27,6 +28,7 @@ class PostViewModel @Inject constructor(
     val getUserUseCase: GetUserUseCase,
     val getUsersPhotoUseCase: GetUsersPhotoUseCase
 ) : ViewModel() {
+
 
     private val _currentUser = MutableStateFlow<UserDetail?>(null)
     val currentUser: StateFlow<UserDetail?> = _currentUser
@@ -63,12 +65,12 @@ class PostViewModel @Inject constructor(
 
     fun loadNextPage(userName: String, page: Int) {
         viewModelScope.launch {
-            _usersPhotos.value +=   getUsersPhotoUseCase(userName, page)
+            _usersPhotos.value += getUsersPhotoUseCase(userName, page)
         }
 
     }
 
-    fun loadMorePosts(page: Int){
+    fun loadMorePosts(page: Int) {
         viewModelScope.launch {
             _posts.value += getListPostsUseCase(page)
         }

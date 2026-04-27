@@ -15,8 +15,8 @@ class PostRepositoryImpl @Inject constructor(val unsplashApi: UnsplashApi) : Pos
         }
     }
 
-    override suspend fun getUser(id: String): UserDetail {
-        return unsplashApi.getUser(id).toModel()
+    override suspend fun getUser(username: String): UserDetail {
+        return unsplashApi.getUser(username).toModel()
     }
 
     override suspend fun getUsersPhoto(userName: String, page: Int): List<SimplePhoto> {

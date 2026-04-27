@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.unplashapi.AppDataStore
 import com.example.unplashapi.BuildConfig
 import com.example.unplashapi.presentation.screens.AuthorizationScreen
 import com.example.unplashapi.presentation.screens.DetailedScreen
@@ -46,7 +47,7 @@ fun AppNavGraph(
                 },
                 onProfileClickListener = {
                     val username = currentUser
-                    if(username != null ){
+                    if (username != null) {
                         val route = Screen.UserProfileScreen.getRouteWithArgs(username)
                         navHostController.navigate(route)
                     }
@@ -73,7 +74,7 @@ fun AppNavGraph(
                 val intent = CustomTabsIntent.Builder().build()
                 intent.launchUrl(
                     context, Uri.parse(
-                        "https://unsplash.com/oauth/authorize?client_id=${BuildConfig.UNSPLASH_KEY}&redirect_uri=unsplashapp://callback&response_type=code&scope=public+read_user+write_likes"
+                        "https://unsplash.com/oauth/authorize?client_id=${BuildConfig.UNSPLASH_KEY}&redirect_uri=unsplashapp://callback&response_type=code&scope=public+read_user+write_user+write_likes"
                     )
                 )
             }
@@ -116,17 +117,24 @@ fun AppNavGraph(
                 }
 
             }
-
+            val currentUser by authViewModel.user.collectAsState()
+            val editState by authViewModel.state.collectAsState()
             user?.let {
                 ProfileScreen(
-                    profile = it, collection = collection, loadMorePhoto = { page ->
+                    profile = it, collection = collection,
+                    loadMorePhoto = { page ->
                         postViewModel.loadNextPage(it.username, page)
                     },
                     onBackPressed = { navHostController.popBackStack() },
                     onPhotoClicked = { photoId ->
                         val route = Screen.DetailedPostScreen.getRouteWithArgs(photoId)
                         navHostController.navigate(route)
-                    }
+                    },
+                    isEditable = currentUser == it.username,
+                    onSaveProfile = { username , firstName , lastName , email , location , bio , instagramUsername->
+                        authViewModel.changeUsersData(username,firstName,lastName,email,location,bio,instagramUsername)
+                    },
+                    editState = editState,
                 )
             }
         }

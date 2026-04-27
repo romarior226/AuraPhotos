@@ -23,6 +23,7 @@ import kotlinx.serialization.Serializable
 data class DownloadsDTO(
     @SerialName("total") val total: Int,
 )
+
 @Serializable
 data class ViewsDTO(
     @SerialName("total") val total: Int,
@@ -37,5 +38,10 @@ data class UserDetailDTO(
     @SerialName("bio") val bio: String?,
     @SerialName("total_collections") val totalCollections: Int,
     @SerialName("total_photos") val totalPhotos: Int,
-    @SerialName("location") val location: String? = null
+    @SerialName("location") val location: String? = null,
+
+    @SerialName("first_name") val firstName: String? = null,
+    @SerialName("last_name") val lastName: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("instagram_username") val instagramUsername: String? = null
 )
