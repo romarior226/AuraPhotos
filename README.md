@@ -60,7 +60,10 @@ SECRET_KEY=your_secret_key
 
 ## Screenshots
 
-> Coming soon
+![Feed Screen](screenshots/feedScreen.jpg)
+![Post Screen](screenshots/postScreen.jpg)
+![Profile Screen](screenshots/profileScreen.jpg)
+
 
 ## License
 
