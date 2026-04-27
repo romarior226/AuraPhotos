@@ -31,7 +31,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        Log.d("API_KEY", BuildConfig.UNSPLASH_KEY)
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()

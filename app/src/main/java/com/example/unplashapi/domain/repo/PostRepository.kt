@@ -12,4 +12,6 @@ interface PostRepository {
 
     suspend fun getUsersPhoto(userName: String, page: Int = 1): List<SimplePhoto>
 
+    suspend fun triggerPost(id: String)
+
 }

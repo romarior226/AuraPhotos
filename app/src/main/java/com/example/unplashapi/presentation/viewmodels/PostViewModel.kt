@@ -68,6 +68,12 @@ class PostViewModel @Inject constructor(
 
     }
 
+    fun loadMorePosts(page: Int){
+        viewModelScope.launch {
+            _posts.value += getListPostsUseCase(page)
+        }
+    }
+
     fun loadUsersPhoto(userName: String) {
         viewModelScope.launch {
             _usersPhotos.value = getUsersPhotoUseCase(userName)

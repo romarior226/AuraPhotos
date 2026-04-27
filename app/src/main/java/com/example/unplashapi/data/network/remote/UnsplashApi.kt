@@ -4,12 +4,17 @@ import com.example.unplashapi.data.network.model.DetailPhotoDTO
 import com.example.unplashapi.data.network.model.PostDTO
 import com.example.unplashapi.data.network.model.SimplePhotoDTO
 import com.example.unplashapi.data.network.model.UserDetailDTO
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UnsplashApi {
 
+    @GET("photos/{id}/download")
+    suspend fun triggerPost(
+        @Path("id") id: String
+    ): Response<Unit>
     @GET("photos")
     suspend fun getPosts(
         @Query("page") page: Int = 1,

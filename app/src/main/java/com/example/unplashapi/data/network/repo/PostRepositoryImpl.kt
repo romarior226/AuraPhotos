@@ -28,4 +28,8 @@ class PostRepositoryImpl @Inject constructor(val unsplashApi: UnsplashApi) : Pos
         }
     }
 
+    override suspend fun triggerPost(id: String) {
+         unsplashApi.triggerPost(id)
+    }
+
 }

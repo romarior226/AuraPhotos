@@ -44,7 +44,11 @@ import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.DetailPhoto
 
 @Composable
-fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit ,  onAvatarClickListener : (String)-> Unit) {
+fun DetailedScreen(
+    detailPhoto: DetailPhoto,
+    onBackPressed: () -> Unit,
+    onAvatarClickListener: (String) -> Unit
+) {
     val clipboardManager = LocalClipboardManager.current
     Scaffold(
         topBar = {
@@ -114,7 +118,7 @@ fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit ,  onAvat
             Stats(downloads = detailPhoto.downloads ?: 0, viewsCount = 0) {
                 clipboardManager.setText(AnnotatedString(detailPhoto.link))
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(5.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -123,12 +127,22 @@ fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit ,  onAvat
                     .padding(horizontal = 15.dp)
 
             ) {
-                Icon(
-                    Icons.Default.DateRange,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-                Text("Published on:${detailPhoto.createdAt}", fontSize = 12.sp)
+                if (detailPhoto.createdAt.isNotBlank()) {
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "Published on: ${
+                            detailPhoto.createdAt
+                                .replace("T", " ")
+                                .replace("Z", "")
+                        }",
+                        fontSize = 12.sp
+                    )
+                }
+
             }
             Spacer(Modifier.height(5.dp))
             Row(
@@ -138,12 +152,14 @@ fun DetailedScreen(detailPhoto: DetailPhoto, onBackPressed: () -> Unit ,  onAvat
                     .fillMaxWidth()
                     .padding(horizontal = 15.dp)
             ) {
-                Icon(
-                    Icons.Default.PhotoCamera,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-                Text("${detailPhoto.location}", fontSize = 12.sp)
+                if (!detailPhoto.location.isNullOrBlank()) {
+                    Icon(
+                        Icons.Default.PhotoCamera,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(detailPhoto.location, fontSize = 12.sp)
+                }
             }
             Spacer(Modifier.height(10.dp))
             Tags(tags = detailPhoto.tags)
@@ -207,6 +223,7 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface
             )
+            Spacer(Modifier.width(4.dp))
             Text("$viewsCount")
         }
         Icon(

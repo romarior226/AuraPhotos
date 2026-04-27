@@ -31,10 +31,8 @@ class AuthViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _token.value = getSavedTokenUseCase()
-            Log.d("AUTH_LOG", "token: ${_token.value}")
             if (_token.value != null) {
                 _user.value = getLoggedUserUseCase()
-                Log.d("AUTH_LOG", "user: ${_user.value}")
             }
 
         }

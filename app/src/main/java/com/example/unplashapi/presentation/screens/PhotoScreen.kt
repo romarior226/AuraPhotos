@@ -1,6 +1,7 @@
 package com.example.unplashapi.presentation.screens
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -32,7 +35,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.Post
 import com.example.unplashapi.presentation.viewmodels.PostViewModel
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -58,6 +65,22 @@ fun PhotoFeedScreen(
     }
     val currentPosts by viewModel.posts.collectAsState()
 
+    val listState = rememberLazyListState()
+    val currentPage = remember { mutableStateOf(1) }
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+
+            lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 2
+        }
+    }
+    LaunchedEffect(shouldLoadMore.value) {
+        if (shouldLoadMore.value) {
+            delay(500)
+            viewModel.loadMorePosts(++currentPage.value)
+
+        }
+    }
     Scaffold(
         topBar = {
         },
@@ -67,7 +90,7 @@ fun PhotoFeedScreen(
             )
         }
     ) {
-        LazyColumn(Modifier.padding(it)) {
+        LazyColumn(Modifier.padding(it), state = listState) {
             items(currentPosts) { post ->
                 PostItem(
                     currentPost = post,
@@ -122,14 +145,19 @@ fun PostItem(
 
                 )
                 Spacer(Modifier.width(10.dp))
-                Text(
-                    text = currentPost.authorName,
-                    modifier = Modifier.weight(1f),
-                    fontSize = 13.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = currentPost.authorUserName,
+                        modifier = Modifier.weight(1f),
+                        fontSize = 12.sp
+                    )
+                    if (currentPost.location != null) {
+                        Text(text = currentPost.location, fontSize = 12.sp)
+                    }
+                }
 
-                Text(text = currentPost.location ?: "", fontSize = 12.sp)
             }
+
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -231,6 +259,7 @@ fun BottomBar(onProfileClick: () -> Unit) {
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun PhotoFeedPreview() {
@@ -248,8 +277,8 @@ fun PhotoFeedPreview() {
                 authorUserName = "test username",
                 authorAvatar = "afjhsdfk",
                 imageUrl = "",
-
-                ),
+                location = "NDJFKHDFKDHFHFK"
+            ),
             changeFavourite = {},
             {},
             {}
