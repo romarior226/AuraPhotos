@@ -10,8 +10,6 @@ A photo browsing Android app powered by the [Unsplash API](https://unsplash.com/
 - **Favorites** — save photos locally using Room database
 - **OAuth 2.0 Authentication** — sign in with your Unsplash account
 - **Share** — copy photo links to clipboard
-- **Attribution** — proper photographer and Unsplash attribution on every photo
-
 ## Tech Stack
 
 | Category | Technology |
