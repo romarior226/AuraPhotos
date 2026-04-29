@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class FavouritePostRepositoryImpl @Inject constructor(val photoDao: PhotoDao) :
+    class FavouritePostRepositoryImpl @Inject constructor(val photoDao: PhotoDao) :
     FavouritePostRepository {
 
 

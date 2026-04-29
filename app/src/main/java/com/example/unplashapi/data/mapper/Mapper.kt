@@ -2,11 +2,14 @@ package com.example.unplashapi.data.mapper
 
 import com.example.unplashapi.data.models.PhotoDbModel
 import com.example.unplashapi.data.network.model.DetailPhotoDTO
+import com.example.unplashapi.data.network.model.DetailPhotoStatisticDTO
 import com.example.unplashapi.data.network.model.PostDTO
 import com.example.unplashapi.data.network.model.SimplePhotoDTO
 import com.example.unplashapi.data.network.model.TokenDTO
 import com.example.unplashapi.data.network.model.UserDetailDTO
+import com.example.unplashapi.domain.models.DailyValue
 import com.example.unplashapi.domain.models.DetailPhoto
+import com.example.unplashapi.domain.models.PhotoStatistics
 import com.example.unplashapi.domain.models.Post
 import com.example.unplashapi.domain.models.SimplePhoto
 import com.example.unplashapi.domain.models.Token
@@ -19,8 +22,24 @@ fun PostDTO.toModel(): Post {
         authorName = this.user.name,
         authorUserName = this.user.username,
         authorAvatar = this.user.profileImage.medium,
-        imageUrl = this.urls.fullUrl,
+        imageUrl = this.urls.regularUrl,
         location = this.user.location,
+    )
+}
+
+fun DetailPhotoStatisticDTO.toModel(): PhotoStatistics {
+    return PhotoStatistics(
+        id = this.id,
+        downloads = this.downloads.total,
+        views = this.views.total,
+        changeViews = this.views.historical.change,
+        changeDownloads = this.downloads.historical.change,
+        valuesViews = this.views.historical.values.map {
+            DailyValue(it.date, it.value)
+        },
+        valuesDownloads = this.downloads.historical.values.map {
+            DailyValue(it.date, it.value)
+        }
     )
 }
 
@@ -53,7 +72,7 @@ fun DetailPhotoDTO.toModel(): DetailPhoto {
         id = this.id,
         createdAt = this.createdAt,
         downloads = this.downloads,
-        urls = this.urls.fullUrl,
+        urls = this.urls.regularUrl,
         location = listOfNotNull(this.location?.city, this.location?.country).joinToString(", "),
         authorName = this.user.name,
         authorUserName = this.user.username,
@@ -66,7 +85,7 @@ fun DetailPhotoDTO.toModel(): DetailPhoto {
 fun SimplePhotoDTO.toModel(): SimplePhoto {
     return SimplePhoto(
         id = this.id,
-        urls = this.urls.fullUrl
+        urls = this.urls.regularUrl
     )
 }
 
@@ -93,6 +112,3 @@ fun UserDetailDTO.toModel(): UserDetail {
         instagramUsername = this.instagramUsername,
     )
 }
-
-
-

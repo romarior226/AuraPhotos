@@ -16,6 +16,7 @@ data class DetailPhotoDTO(
     @SerialName("links") val links: LinksDTO,
 )
 
+
 @Serializable
 data class LocationDTO(
     @SerialName("city") val city: String?,

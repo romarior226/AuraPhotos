@@ -34,7 +34,6 @@ fun AppNavGraph(
         startDestination = Screen.AuthScreen.route
     ) {
         composable(Screen.PostsScreen.route) {
-            val currentUser by authViewModel.user.collectAsState()
             PhotoFeedScreen(
                 viewModel = postViewModel,
                 onPostClickListener = {
@@ -45,15 +44,6 @@ fun AppNavGraph(
                     val route = Screen.UserProfileScreen.getRouteWithArgs(it)
                     navHostController.navigate(route)
                 },
-                onProfileClickListener = {
-                    val username = currentUser
-                    if (username != null) {
-                        val route = Screen.UserProfileScreen.getRouteWithArgs(username)
-                        navHostController.navigate(route)
-                    }
-
-
-                }
             )
 
         }
@@ -90,7 +80,8 @@ fun AppNavGraph(
             LaunchedEffect(postId) {
                 if (postId != null) detailViewModel.loadPhoto(postId)
             }
-
+            val collection by postViewModel.usersPhotos.collectAsState()
+            val statistics by detailViewModel.photoStatistics.collectAsState()
             photo?.let {
                 DetailedScreen(
                     it,
@@ -101,6 +92,18 @@ fun AppNavGraph(
                         val route = Screen.UserProfileScreen.getRouteWithArgs(userId)
                         navHostController.navigate(route)
                     },
+                    collection = collection.filter { photoFromGrid ->
+                        photoFromGrid.id != it.id
+                    },
+                    loadMorePhoto = { page ->
+                        postViewModel.loadNextPage(it.authorUserName, page)
+                    },
+                    onPhotoClicked = { photoId ->
+                        val route = Screen.DetailedPostScreen.getRouteWithArgs(photoId)
+                        navHostController.navigate(route)
+                    },
+                    photoStatistics = statistics
+                        ?: throw IllegalArgumentException("There are no Statistics"),
                 )
             }
         }
@@ -131,8 +134,16 @@ fun AppNavGraph(
                         navHostController.navigate(route)
                     },
                     isEditable = currentUser == it.username,
-                    onSaveProfile = { username , firstName , lastName , email , location , bio , instagramUsername->
-                        authViewModel.changeUsersData(username,firstName,lastName,email,location,bio,instagramUsername)
+                    onSaveProfile = { username, firstName, lastName, email, location, bio, instagramUsername ->
+                        authViewModel.changeUsersData(
+                            username,
+                            firstName,
+                            lastName,
+                            email,
+                            location,
+                            bio,
+                            instagramUsername
+                        )
                     },
                     editState = editState,
                 )

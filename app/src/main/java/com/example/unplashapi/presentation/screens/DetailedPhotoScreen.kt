@@ -1,5 +1,6 @@
 package com.example.unplashapi.presentation.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,13 +8,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,6 +38,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,13 +54,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.DetailPhoto
+import com.example.unplashapi.domain.models.PhotoStatistics
+import com.example.unplashapi.domain.models.SimplePhoto
+import kotlinx.coroutines.delay
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DetailedScreen(
     detailPhoto: DetailPhoto,
     onBackPressed: () -> Unit,
-    onAvatarClickListener: (String) -> Unit
+    collection: List<SimplePhoto>,
+    photoStatistics: PhotoStatistics,
+    onAvatarClickListener: (String) -> Unit,
+    loadMorePhoto: (Int) -> Unit,
+    onPhotoClicked: (String) -> Unit,
 ) {
+    val listState = rememberLazyStaggeredGridState()
+    val currentPage = remember { mutableIntStateOf(1) }
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+
+            lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 2
+        }
+    }
+    LaunchedEffect(shouldLoadMore.value) {
+        if (shouldLoadMore.value) {
+            delay(500)
+            loadMorePhoto(++currentPage.intValue)
+
+        }
+    }
     val clipboardManager = LocalClipboardManager.current
     Scaffold(
         topBar = {
@@ -95,74 +131,97 @@ fun DetailedScreen(
 
             }
         }
-    ) {
-        Column(
-            Modifier
-                .padding(it)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    ) { paddingValues ->
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(150.dp),
+            state = listState,
+            verticalItemSpacing = 4.dp,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 10.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         )
         {
-            AsyncImage(
-                model = detailPhoto.urls,
-                contentDescription = null,
-                placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .heightIn(max = 300.dp),
-                contentScale = ContentScale.FillWidth
-            )
-            Spacer(Modifier.height(10.dp))
-            Stats(downloads = detailPhoto.downloads ?: 0, viewsCount = 0) {
-                clipboardManager.setText(AnnotatedString(detailPhoto.link))
-            }
-            Spacer(Modifier.height(5.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 15.dp)
-
-            ) {
-                if (detailPhoto.createdAt.isNotBlank()) {
-                    Icon(
-                        Icons.Default.DateRange,
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AsyncImage(
+                        model = detailPhoto.urls,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
+                        placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceVariant),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .heightIn(max = 300.dp),
+                        contentScale = ContentScale.FillWidth
                     )
-                    Text(
-                        "Published on: ${
-                            detailPhoto.createdAt
-                                .replace("T", " ")
-                                .replace("Z", "")
-                        }",
-                        fontSize = 12.sp
-                    )
-                }
+                    Spacer(Modifier.height(10.dp))
+                    Stats(
+                        downloads = detailPhoto.downloads ?: 0,
+                        viewsCount = photoStatistics.views
+                    ) {
+                        clipboardManager.setText(AnnotatedString(detailPhoto.link))
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 0.dp)
 
-            }
-            Spacer(Modifier.height(5.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 15.dp)
-            ) {
-                if (!detailPhoto.location.isNullOrBlank()) {
-                    Icon(
-                        Icons.Default.PhotoCamera,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(detailPhoto.location, fontSize = 12.sp)
+                    ) {
+                        if (detailPhoto.createdAt.isNotBlank()) {
+                            Icon(
+                                Icons.Default.DateRange,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = detailPhoto.createdAt
+                                    .replace("T", " ")
+                                    .replace("Z", ""),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 0.dp)
+                    ) {
+                        if (!detailPhoto.location.isNullOrBlank()) {
+                            Icon(
+                                Icons.Default.PhotoCamera,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(detailPhoto.location, fontSize = 12.sp)
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Tags(tags = detailPhoto.tags)
+                    Spacer(Modifier.height(10.dp))
                 }
             }
-            Spacer(Modifier.height(10.dp))
-            Tags(tags = detailPhoto.tags)
+            items(items = collection, key = { photo -> photo.id }) { photo ->
+                AsyncImage(
+                    model = photo.urls,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .widthIn(max = 180.dp)
+                        .clickable { onPhotoClicked(photo.id) }
+                )
+            }
 
         }
     }
@@ -174,12 +233,13 @@ fun Tags(tags: List<String>) {
     Text(
         "#Tags", Modifier
             .fillMaxWidth()
-            .padding(horizontal = 15.dp)
+            .padding(horizontal = 0.dp)
     )
     Spacer(Modifier.height(10.dp))
     FlowRow(
-        horizontalArrangement = Arrangement.Absolute.spacedBy(0.dp),
-        modifier = Modifier.padding(horizontal = 3.dp)
+        modifier = Modifier
+            .padding(horizontal = 0.dp)
+            .fillMaxWidth()
     ) {
         tags.forEach { tags ->
             Row(modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp)) {
@@ -190,7 +250,7 @@ fun Tags(tags: List<String>) {
                             MaterialTheme.colorScheme.surfaceDim,
                             shape = RoundedCornerShape(30)
                         )
-                        .padding(vertical = 6.dp, horizontal = 8.dp),
+                        .padding(vertical = 5.dp, horizontal = 8.dp),
                     fontSize = 12.sp
                 )
             }
@@ -203,7 +263,7 @@ fun Tags(tags: List<String>) {
 fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
     Row(
         Modifier
-            .padding(vertical = 0.dp, horizontal = 15.dp)
+            .padding(vertical = 0.dp, horizontal = 0.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -214,7 +274,7 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface
             )
-            Text("$downloads")
+            Text(converter(downloads))
         }
         Spacer(Modifier.width(20.dp))
         Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
@@ -224,7 +284,7 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
                 tint = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.width(4.dp))
-            Text("$viewsCount")
+            Text(converter(viewsCount))
         }
         Icon(
             Icons.Default.Share,
@@ -232,7 +292,6 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.clickable(
                 interactionSource = null,
-                indication = null,
                 onClick = {
                     onShareClickListener()
                 }
@@ -245,7 +304,6 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.clickable(
                 interactionSource = null,
-                indication = null,
                 onClick = {}
             ),
         )
@@ -257,13 +315,18 @@ fun Stats(viewsCount: Int, downloads: Int, onShareClickListener: () -> Unit) {
 
             modifier = Modifier.clickable(
                 interactionSource = null,
-                indication = null,
                 onClick = {}
             ),
         )
 
 
     }
+}
+
+fun converter(count: Int): String {
+    return if (count < 1000) count.toString()
+    else if (count < 1000000) "%.1f".format(count.toFloat() / 1_000) +"K"
+    else "%.1f".format(count.toFloat() / 1_000_000) + "M"
 }
 
 @Preview
@@ -299,6 +362,18 @@ fun DetailedScreenPreview() {
             link = "",
         ),
         onBackPressed = {},
-        {}
+        loadMorePhoto = {},
+        onPhotoClicked = {},
+        onAvatarClickListener = {},
+        collection = emptyList(),
+        photoStatistics = PhotoStatistics(
+            id = "sdfgjh",
+            downloads = 12312,
+            views = 34534534,
+            changeViews = 123,
+            changeDownloads = 4,
+            valuesViews = listOf(),
+            valuesDownloads = listOf()
+        ),
     )
 }

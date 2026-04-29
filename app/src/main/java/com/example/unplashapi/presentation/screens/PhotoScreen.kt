@@ -4,7 +4,6 @@ package com.example.unplashapi.presentation.screens
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,15 +17,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.unplashapi.domain.models.Post
+import com.example.unplashapi.navgition.Screen
 import com.example.unplashapi.presentation.viewmodels.PostViewModel
 import kotlinx.coroutines.delay
 
@@ -58,19 +54,14 @@ fun PhotoFeedScreen(
     viewModel: PostViewModel,
     onPostClickListener: (Post) -> Unit,
     onAvatarClickListener: (String) -> Unit,
-    onProfileClickListener: () -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.loadPosts(1)
-    }
-    val currentPosts by viewModel.posts.collectAsState()
 
+    val currentPosts by viewModel.posts.collectAsState()
     val listState = rememberLazyListState()
     val currentPage = remember { mutableStateOf(1) }
     val shouldLoadMore = remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-
             lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 2
         }
     }
@@ -83,15 +74,13 @@ fun PhotoFeedScreen(
     }
     Scaffold(
         topBar = {
+
         },
         bottomBar = {
-            BottomBar(
-                onProfileClick = onProfileClickListener
-            )
         }
     ) {
         LazyColumn(Modifier.padding(it), state = listState) {
-            items(currentPosts) { post ->
+            items(currentPosts, key = { post -> post.id }) { post ->
                 PostItem(
                     currentPost = post,
                     changeFavourite = { post ->
@@ -116,7 +105,7 @@ fun PostItem(
 ) {
     Box(
         Modifier
-            .padding(15.dp)
+            .padding(vertical =  8.dp , horizontal = 15.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(5))
 
@@ -129,7 +118,6 @@ fun PostItem(
                     .padding(horizontal = 15.dp, vertical = 10.dp)
                     .clickable(
                         interactionSource = null,
-                        indication = null,
                         onClick = {
                             onAvatarClickListener(currentPost.authorUserName)
                         }
@@ -174,7 +162,6 @@ fun PostItem(
                         .heightIn(max = 300.dp)
                         .clickable(
                             interactionSource = null,
-                            indication = null,
                             onClick = {
                                 onPostClickListener(currentPost)
                             }
@@ -209,7 +196,6 @@ fun PostItem(
                             .clickable(
                                 enabled = true,
                                 interactionSource = null,
-                                indication = null,
                                 onClick = {
                                     changeFavourite(currentPost)
                                 }
@@ -223,41 +209,7 @@ fun PostItem(
 }
 
 //positionClick:(Int)-> Unit)
-@Composable
-fun BottomBar(onProfileClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .clickable {
-                    onProfileClick()
-                }
-        ) {
-            Icon(Icons.Default.Home, contentDescription = null, Modifier.size(40.dp))
-        }
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .clickable { }
-        ) {
-            Icon(Icons.Default.Search, contentDescription = null, Modifier.size(40.dp))
-        }
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .clickable {
-                    onProfileClick()
-                }
-        ) {
-            Icon(Icons.Default.Person, contentDescription = null, Modifier.size(40.dp))
-        }
-    }
-}
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
@@ -266,23 +218,42 @@ fun PhotoFeedPreview() {
     Scaffold(
         bottomBar = {
             BottomBar(
-                {}
+                currentRoute = Screen.PostsScreen.route,
+                onItemClickListener = {
+
+                }
             )
         }
     ) {
-        PostItem(
-            currentPost = Post(
-                id = "sdfsfsdf",
-                authorName = "test author",
-                authorUserName = "test username",
-                authorAvatar = "afjhsdfk",
-                imageUrl = "",
-                location = "NDJFKHDFKDHFHFK"
-            ),
-            changeFavourite = {},
-            {},
-            {}
-        )
+        Column() {
+            PostItem(
+                currentPost = Post(
+                    id = "sdfsfsdf",
+                    authorName = "test author",
+                    authorUserName = "test username",
+                    authorAvatar = "afjhsdfk",
+                    imageUrl = "",
+                    location = "NDJFKHDFKDHFHFK"
+                ),
+                changeFavourite = {},
+                {},
+                {}
+            )
+            PostItem(
+                currentPost = Post(
+                    id = "sdfsfsdf",
+                    authorName = "test author",
+                    authorUserName = "test username",
+                    authorAvatar = "afjhsdfk",
+                    imageUrl = "",
+                    location = "NDJFKHDFKDHFHFK"
+                ),
+                changeFavourite = {},
+                {},
+                {}
+            )
+        }
+
     }
 
 }

@@ -229,7 +229,7 @@ fun PhotoGrid(list: List<SimplePhoto>, loadMore: (Int) -> Unit, onPhotoClicked: 
         modifier = Modifier.padding(horizontal = 10.dp),
 
         ) {
-        items(list) {
+        items(list , key = {photo-> photo.id}) {
             AsyncImage(
                 model = it.urls,
                 contentDescription = null,
@@ -238,8 +238,6 @@ fun PhotoGrid(list: List<SimplePhoto>, loadMore: (Int) -> Unit, onPhotoClicked: 
                     .widthIn(max = 180.dp)
                     .animateItem()
                     .clickable(
-                        interactionSource = null,
-                        indication = null,
                         onClick = {
                             onPhotoClicked(it.id)
                         }
@@ -252,30 +250,26 @@ fun PhotoGrid(list: List<SimplePhoto>, loadMore: (Int) -> Unit, onPhotoClicked: 
 @Preview
 @Composable
 fun ProfileScreenPreview() {
+
     ProfileScreen(
         profile = UserDetail(
             id = "sfgsfg",
             username = "testUserName",
-            profileImage = "Test",
-            name = "name",
-            bio = "bioasdfsdfsfsfsdfsdfsf",
+            profileImage = "https://example.com/image.jpg",
+            name = "John Doe",
+            bio = "Android Developer | Kotlin Lover",
             totalCollections = 10,
-            location = "selo",
-            totalPhotos = 1
+            location = "Kyiv, Ukraine",
+            totalPhotos = 120
         ),
         collection = listOf(),
         onBackPressed = { },
         loadMorePhoto = {},
-        {},
-        isEditable = TODO(),
-        onSaveProfile = TODO(),
-        editState = TODO(),
-    )
-    MinimalDialog(
-        {},
-        onSaveProfile = { string, string1, string2, string3, string4, string5, string6 ->
+        onPhotoClicked = { photoId -> },
+        isEditable = true,
+        onSaveProfile = { n, u, b, l, w, i, p ->
         },
-        currentUser = TODO(),
+        editState = EditProfileUiState()
     )
 }
 
@@ -317,7 +311,6 @@ fun MinimalDialog(
                         contentDescription = "",
                         modifier = Modifier.clickable(
                             interactionSource = null,
-                            indication = null,
                             onClick = {
                                 onDismissRequest()
                             }

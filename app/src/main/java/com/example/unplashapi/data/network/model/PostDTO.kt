@@ -9,11 +9,8 @@ data class PostDTO(
     @SerialName("id") val id: String,
     @SerialName("urls") val urls: PhotoUrlDTO,
     @SerialName("user") val user: UserDTO,
-
     )
-
-
 @Serializable
 data class PhotoUrlDTO(
-    @SerialName("full") val fullUrl: String
+    @SerialName("regular") val regularUrl: String
 )
