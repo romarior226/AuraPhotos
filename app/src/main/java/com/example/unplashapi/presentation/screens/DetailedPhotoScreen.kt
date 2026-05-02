@@ -70,7 +70,7 @@ fun DetailedScreen(
     onPhotoClicked: (String) -> Unit,
 ) {
     val listState = rememberLazyStaggeredGridState()
-    val currentPage = remember { mutableIntStateOf(1) }
+    val currentPage = remember { mutableIntStateOf(2) }
     val shouldLoadMore = remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()

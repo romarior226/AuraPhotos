@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.unplashapi.domain.models.DetailPhoto
 import com.example.unplashapi.domain.models.PhotoStatistics
+import com.example.unplashapi.domain.models.ResultState
 import com.example.unplashapi.domain.usecases.GetDetailedPhotoUseCase
 import com.example.unplashapi.domain.usecases.GetPhotoStatistics
 import com.example.unplashapi.domain.usecases.TriggerPostUseCase
@@ -20,20 +21,24 @@ class DetailViewModel @Inject constructor(
     val getPhotoStatistics: GetPhotoStatistics
 ) : ViewModel() {
 
-    private val _photo = MutableStateFlow<DetailPhoto?>(null)
-    val photo: StateFlow<DetailPhoto?> = _photo
+    private val _photoState = MutableStateFlow<ResultState<DetailPhoto>>(ResultState.Loading)
+    val photoState: StateFlow<ResultState<DetailPhoto>> = _photoState
 
     val photoStatistics = MutableStateFlow<PhotoStatistics?>(null)
 
     fun loadPhoto(id: String) {
-        if (_photo.value != null) {
-            _photo.value = null
-            photoStatistics.value = null
-        }
         viewModelScope.launch {
-            photoStatistics.value = getPhotoStatistics(id)
-            _photo.value = getDetailedPhotoUseCase(id)
-            triggerPostUseCase(id)
+            _photoState.value = ResultState.Loading
+            try {
+                photoStatistics.value = getPhotoStatistics(id)
+                _photoState.value = ResultState.Success(getDetailedPhotoUseCase(id))
+                triggerPostUseCase(id)
+            }
+            catch (e: Exception ){
+             _photoState.value = ResultState.Error(e.message ?: "Unknown Error")
+            }
+
         }
+
     }
 }

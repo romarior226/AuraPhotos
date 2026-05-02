@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-
 @HiltViewModel
 class PostViewModel @Inject constructor(
     val getListPostsUseCase: GetListPostUseCase,
@@ -47,7 +46,11 @@ class PostViewModel @Inject constructor(
             initialValue = emptySet()
         )
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
     private val _currentUser = MutableStateFlow<UserDetail?>(null)
     val currentUser: StateFlow<UserDetail?> = _currentUser
 
@@ -68,36 +71,57 @@ class PostViewModel @Inject constructor(
 
     init {
         loadPosts(1)
+
+
     }
 
 
     fun loadUser(id: String) {
         viewModelScope.launch {
-            _currentUser.value = null
-            _usersPhotos.value = emptyList()
-            val user = getUserUseCase(id)
-            _currentUser.value = user
-            loadUsersPhoto(user.username)
+            try {
+                _currentUser.value = null
+                _usersPhotos.value = emptyList()
+                val user = getUserUseCase(id)
+                _currentUser.value = user
+                loadUsersPhoto(user.username)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
 
         }
     }
 
     fun loadNextPage(userName: String, page: Int) {
         viewModelScope.launch {
-            _usersPhotos.value += getUsersPhotoUseCase(userName, page)
+            try {
+                _usersPhotos.value += getUsersPhotoUseCase(userName, page)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+
         }
 
     }
 
     fun loadMorePosts(page: Int) {
         viewModelScope.launch {
-            _remotePosts.value += getListPostsUseCase(page)
+            try {
+                _remotePosts.value += getListPostsUseCase(page)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+
         }
     }
 
     fun loadUsersPhoto(userName: String) {
         viewModelScope.launch {
-            _usersPhotos.value = getUsersPhotoUseCase(userName)
+            try {
+                _usersPhotos.value = getUsersPhotoUseCase(userName)
+            } catch (e: Exception) {
+                throw RuntimeException(e.message)
+            }
+
         }
 
     }
@@ -112,9 +136,18 @@ class PostViewModel @Inject constructor(
             }
         }
     }
+
     fun loadPosts(page: Int) {
         viewModelScope.launch {
-            _remotePosts.value = getListPostsUseCase(page)
+            _isLoading.value = true
+            _error.value = null
+            try {
+                _remotePosts.value = getListPostsUseCase(page)
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 

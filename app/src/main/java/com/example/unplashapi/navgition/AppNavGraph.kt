@@ -2,10 +2,16 @@ package com.example.unplashapi.navgition
 
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -14,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.unplashapi.AppDataStore
 import com.example.unplashapi.BuildConfig
+import com.example.unplashapi.domain.models.ResultState
 import com.example.unplashapi.presentation.screens.AuthorizationScreen
 import com.example.unplashapi.presentation.screens.DetailedScreen
 import com.example.unplashapi.presentation.screens.PhotoFeedScreen
@@ -75,16 +82,23 @@ fun AppNavGraph(
             arguments = listOf(navArgument("postId") { type = NavType.StringType })
         ) { navBackStackEntry ->
             val postId = navBackStackEntry.arguments?.getString("postId")
-            val photo by detailViewModel.photo.collectAsState()
+            val photoState by detailViewModel.photoState.collectAsState()
 
             LaunchedEffect(postId) {
                 if (postId != null) detailViewModel.loadPhoto(postId)
             }
             val collection by postViewModel.usersPhotos.collectAsState()
             val statistics by detailViewModel.photoStatistics.collectAsState()
-            photo?.let {
-                DetailedScreen(
-                    it,
+            when (val state = photoState) {
+                is ResultState.Error -> Text(state.message)
+                ResultState.Loading -> Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+                is ResultState.Success -> DetailedScreen(
+                    detailPhoto = state.data,
                     onBackPressed = {
                         navHostController.popBackStack()
                     },
@@ -93,10 +107,10 @@ fun AppNavGraph(
                         navHostController.navigate(route)
                     },
                     collection = collection.filter { photoFromGrid ->
-                        photoFromGrid.id != it.id
+                        photoFromGrid.id != state.data.id
                     },
                     loadMorePhoto = { page ->
-                        postViewModel.loadNextPage(it.authorUserName, page)
+                        postViewModel.loadNextPage(state.data.authorUserName, page)
                     },
                     onPhotoClicked = { photoId ->
                         val route = Screen.DetailedPostScreen.getRouteWithArgs(photoId)
@@ -106,7 +120,10 @@ fun AppNavGraph(
                         ?: throw IllegalArgumentException("There are no Statistics"),
                 )
             }
+
         }
+
+
         composable(
             route = Screen.UserProfileScreen.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })

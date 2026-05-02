@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,7 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,9 +58,11 @@ fun PhotoFeedScreen(
     onAvatarClickListener: (String) -> Unit,
 ) {
 
+    val loadingState by viewModel.isLoading.collectAsState()
+    val errorState by viewModel.error.collectAsState()
     val currentPosts by viewModel.posts.collectAsState()
     val listState = rememberLazyListState()
-    val currentPage = remember { mutableStateOf(1) }
+    val currentPage = remember { mutableIntStateOf(1) }
     val shouldLoadMore = remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
@@ -68,8 +72,7 @@ fun PhotoFeedScreen(
     LaunchedEffect(shouldLoadMore.value) {
         if (shouldLoadMore.value) {
             delay(500)
-            viewModel.loadMorePosts(++currentPage.value)
-
+            viewModel.loadMorePosts(++currentPage.intValue)
         }
     }
     Scaffold(
@@ -79,22 +82,28 @@ fun PhotoFeedScreen(
         bottomBar = {
         }
     ) {
-        LazyColumn(Modifier.padding(it), state = listState) {
-            items(currentPosts, key = { post -> post.id }) { post ->
-                PostItem(
-                    currentPost = post,
-                    changeFavourite = { post ->
-                        viewModel.toggleFavourite(post.id)
-                    },
-                    onPostClickListener,
-                    onAvatarClickListener
-                )
+        if (errorState != null) {
+            Text(errorState ?: "")
+        } else if (loadingState) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else
+            LazyColumn(Modifier.padding(it), state = listState) {
+                items(currentPosts, key = { post -> post.id }) { post ->
+                    PostItem(
+                        currentPost = post,
+                        changeFavourite = { post ->
+                            viewModel.toggleFavourite(post.id)
+                        },
+                        onPostClickListener,
+                        onAvatarClickListener
+                    )
 
+                }
             }
         }
-
     }
-}
 
 @Composable
 fun PostItem(
@@ -105,7 +114,7 @@ fun PostItem(
 ) {
     Box(
         Modifier
-            .padding(vertical =  8.dp , horizontal = 15.dp)
+            .padding(vertical = 8.dp, horizontal = 15.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(5))
 

@@ -2,23 +2,17 @@ package com.example.unplashapi.presentation.screens
 
 import UnplashApiTheme
 import android.content.res.Configuration
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,8 +73,8 @@ fun MainScreen(
                 )
             }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
+    ) { _ ->
+        Box() {
             AppNavGraph(
                 navHostController = navController,
                 postViewModel = postViewModel,
@@ -101,11 +95,8 @@ fun BottomBar(
         NavItems.Profile
     )
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .height(60.dp)
             .drawBehind {
                 val strokeWidth = 2.dp.toPx()
                 val y = 0f
@@ -116,7 +107,8 @@ fun BottomBar(
                     strokeWidth = strokeWidth
                 )
             }
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+
+
     ) {
         items.forEach { item ->
             val selected = when {
