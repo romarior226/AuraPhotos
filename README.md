@@ -63,6 +63,7 @@ SECRET_KEY=your_secret_key
 ![Feed Screen](screenshots/feedScreen.jpg)
 ![Post Screen](screenshots/postScreen.jpg)
 ![Profile Screen](screenshots/profileScreen.jpg)
+![Search Screen](screenshots/searchScreen.jpg)
 
 
 ## License
