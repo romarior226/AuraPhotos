@@ -5,6 +5,9 @@ sealed class Screen(
 ) {
     object PostsScreen : Screen(POSTS_SCREEN)
 
+
+    object SearchScreen : Screen(SEARCH_SCREEN)
+
     object AuthScreen : Screen(AUTH_SCREEN)
 
     object FavouriteScreen : Screen(FAVOURITE_SCREEN)
@@ -24,7 +27,6 @@ sealed class Screen(
         }
     }
 
-
     companion object {
         const val FAVOURITE_SCREEN = "favourite_screen"
         const val POSTS_SCREEN = "posts_screen"
@@ -32,6 +34,8 @@ sealed class Screen(
         const val DETAILED_SCREEN = "detailed_screen/{postId}"
 
         const val USER_SCREEN = "user_screen/{userId}"
+
+        const val SEARCH_SCREEN = "search_screen"
 
     }
 }

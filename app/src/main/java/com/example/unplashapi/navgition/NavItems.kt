@@ -20,8 +20,8 @@ sealed class NavItems(
     )
 
     object Search : NavItems(
-        route = "",
-        title = "Улюблені",
+        route = Screen.SearchScreen.route,
+        title = "Search",
         icon = Icons.Default.Search
     )
 

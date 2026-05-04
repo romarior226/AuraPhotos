@@ -28,7 +28,7 @@ class DetailViewModel @Inject constructor(
 
     fun loadPhoto(id: String) {
         viewModelScope.launch {
-            _photoState.value = ResultState.Loading
+                _photoState.value = ResultState.Loading
             try {
                 photoStatistics.value = getPhotoStatistics(id)
                 _photoState.value = ResultState.Success(getDetailedPhotoUseCase(id))

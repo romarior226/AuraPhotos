@@ -14,4 +14,6 @@ interface PostRepository {
 
     suspend fun triggerPost(id: String)
 
+    suspend fun searchPhoto(query: String , page : Int): List<SimplePhoto>
+
 }

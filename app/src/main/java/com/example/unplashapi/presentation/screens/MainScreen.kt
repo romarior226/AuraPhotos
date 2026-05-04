@@ -31,12 +31,14 @@ import com.example.unplashapi.navgition.Screen
 import com.example.unplashapi.presentation.viewmodels.AuthViewModel
 import com.example.unplashapi.presentation.viewmodels.DetailViewModel
 import com.example.unplashapi.presentation.viewmodels.PostViewModel
+import com.example.unplashapi.presentation.viewmodels.SearchViewModel
 
 @Composable
 fun MainScreen(
     authViewModel: AuthViewModel,
     postViewModel: PostViewModel = hiltViewModel(),
-    detailViewModel: DetailViewModel = hiltViewModel()
+    detailViewModel: DetailViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
     val myUsername by authViewModel.user.collectAsState()
@@ -79,7 +81,8 @@ fun MainScreen(
                 navHostController = navController,
                 postViewModel = postViewModel,
                 detailViewModel = detailViewModel,
-                authViewModel = authViewModel
+                authViewModel = authViewModel,
+                searchViewModel = searchViewModel
             )
         }
     }
@@ -92,11 +95,13 @@ fun BottomBar(
 ) {
     val items = listOf(
         NavItems.Home,
-        NavItems.Profile
+        NavItems.Search,
+        NavItems.Profile,
     )
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier
+            .height(60.dp)
             .drawBehind {
                 val strokeWidth = 2.dp.toPx()
                 val y = 0f

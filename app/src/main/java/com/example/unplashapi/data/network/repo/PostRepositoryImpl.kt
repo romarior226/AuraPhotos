@@ -29,7 +29,13 @@ class PostRepositoryImpl @Inject constructor(val unsplashApi: UnsplashApi) : Pos
     }
 
     override suspend fun triggerPost(id: String) {
-         unsplashApi.triggerPost(id)
+        unsplashApi.triggerPost(id)
+    }
+
+    override suspend fun searchPhoto(query: String, page: Int): List<SimplePhoto> {
+        return unsplashApi.searchPhotos(query, page = page).results.map {
+            it.toModel()
+        }
     }
 
 }
